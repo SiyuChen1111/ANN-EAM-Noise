@@ -1,0 +1,95 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+*.manifest
+*.spec
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+pip-log.txt
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Data Files (Large files - can be downloaded)
+data/mnist-data/
+data/raw/mnist/
+data/raw/rtnet/
+*.mat
+*.h5
+*.hdf5
+
+# Model Files (large weights)
+*.pth
+*.pt
+*.ckpt
+*.pkl
+*.pickle
+
+# Output Files (can be regenerated)
+outputs/experiments/*/figures_apa/*.png
+outputs/experiments/*/*.png
+outputs/experiments/*/*.pdf
+outputs/experiments/*/training.log
+training_nohup*.log
+
+# Backup
+backup/
+*.bak
+*.backup
+
+# Archive
+archive/
+
+# Environment
+.env
+.env.local
+
+# Temporary Files
+*.tmp
+*.temp
+.cache/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
