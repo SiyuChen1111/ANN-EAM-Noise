@@ -387,30 +387,31 @@ def plot_model_summary_apa(results_path, output_path):
     print(f"Model summary saved to: {output_path}")
 
 def main():
-    output_dir = 'output_convlstm_v2'
-    log_path = 'training_nohup_100ep.log'
+    output_dir = 'outputs/experiments/mnist_convlstm/exp01_fixed_noise_ep100'
+    log_path = 'outputs/experiments/mnist_convlstm/exp01_fixed_noise_ep100/training.log'
     results_path = os.path.join(output_dir, 'convlstm_nf16_ks3_ep100_bs64_lr0.001_t20_rt_sup_human_resp_results.csv')
     
-    os.makedirs('figures_apa', exist_ok=True)
+    os.makedirs(os.path.join(output_dir, 'figures_apa'), exist_ok=True)
+    figures_dir = os.path.join(output_dir, 'figures_apa')
     
     print("Generating APA-style visualizations...")
     print("="*60)
     
-    plot_training_curves_apa(log_path, 'figures_apa/fig1_training_curves.png')
+    plot_training_curves_apa(log_path, os.path.join(figures_dir, 'fig1_training_curves.png'))
     
-    plot_rt_distribution_apa(results_path, 'figures_apa/fig2_rt_distribution.png')
+    plot_rt_distribution_apa(results_path, os.path.join(figures_dir, 'fig2_rt_distribution.png'))
     
-    plot_confusion_matrix_apa(results_path, 'figures_apa/fig3_confusion_matrix.png')
+    plot_confusion_matrix_apa(results_path, os.path.join(figures_dir, 'fig3_confusion_matrix.png'))
     
-    plot_rt_by_digit_apa(results_path, 'figures_apa/fig4_rt_by_digit.png')
+    plot_rt_by_digit_apa(results_path, os.path.join(figures_dir, 'fig4_rt_by_digit.png'))
     
-    plot_accuracy_by_rt_bin_apa(results_path, 'figures_apa/fig5_accuracy_by_rt_bin.png')
+    plot_accuracy_by_rt_bin_apa(results_path, os.path.join(figures_dir, 'fig5_accuracy_by_rt_bin.png'))
     
-    plot_model_summary_apa(results_path, 'figures_apa/fig6_model_summary.png')
+    plot_model_summary_apa(results_path, os.path.join(figures_dir, 'fig6_model_summary.png'))
     
     print("\n" + "="*60)
     print("All APA-style figures generated successfully!")
-    print("Output directory: figures_apa/")
+    print(f"Output directory: {figures_dir}")
     print("="*60)
 
 if __name__ == '__main__':

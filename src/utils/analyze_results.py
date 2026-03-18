@@ -318,8 +318,8 @@ def print_statistical_report(df, stim_stats, overall_stats):
     print("* p < 0.05, ** p < 0.01, *** p < 0.001")
 
 def main():
-    RESULTS_PATH = './output_mnist_convlstm/results.csv'
-    OUTPUT_DIR = './output_mnist_convlstm/analysis'
+    RESULTS_PATH = 'outputs/experiments/mnist_convlstm/exp01_fixed_noise_ep100/convlstm_nf16_ks3_ep100_bs64_lr0.001_t20_rt_sup_human_resp_results.csv'
+    OUTPUT_DIR = 'outputs/experiments/mnist_convlstm/exp01_fixed_noise_ep100/analysis'
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
     print("Loading results...")
