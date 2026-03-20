@@ -12,6 +12,7 @@ This project combines cognitive modeling (Evidence Accumulation Models) with dee
 - 🔬 **Neural Network Integration**: Deep learning models (ConvLSTM, AlexNet-LSTM) for behavioral prediction
 - 📊 **APA-Compliant Visualization**: Publication-ready figures following APA guidelines
 - 🔄 **Reproducible Research**: TIER Protocol-compliant project structure
+- ⚡ **SAT (Speed-Accuracy Trade-off)**: Condition-specific decision thresholds
 
 ## Project Structure
 
@@ -27,36 +28,24 @@ ANN-EAM-Nosie/
 ├── src/                      # Source code
 │   ├── data/                # Data processing scripts
 │   ├── models/              # Model definitions
-│   │   ├── eam/            # Evidence Accumulation Model
-│   │   └── encoders/       # Encoder architectures
+│   │   └── convlstm_sat.py  # SAT model implementation
 │   ├── experiments/         # Experiment scripts
-│   │   ├── mnist_convlstm/ # MNIST ConvLSTM experiment
-│   │   └── mnist_alexnet_lstm/
+│   │   └── mnist_convlstm/  # MNIST ConvLSTM experiments
 │   └── utils/               # Utility functions
-│
-├── notebooks/                # Jupyter notebooks
-│   ├── exploration/         # Exploratory analysis
-│   └── experiments/         # Experiment notebooks
+│       └── unified_analysis.py  # Unified analysis tool
 │
 ├── outputs/                  # Experiment outputs
-│   ├── experiments/         # Results by experiment
-│   └── analysis/            # Cross-experiment analysis
-│
-├── docs/                     # Documentation
-│   ├── data/                # Data documentation
-│   ├── models/              # Model documentation
-│   ├── experiments/         # Experiment logs
-│   └── usage/               # Usage guides
+│   └── experiments/
+│       └── mnist_convlstm/  # Experiment results
+│           └── logs/        # Progress logs
 │
 ├── drafts/                   # Work-in-progress
 │   ├── ideas/               # Ideas and notes
 │   └── papers/              # Draft manuscripts
 │
-├── .trae/                    # Trae IDE configuration
-│   └── skills/              # Agent skills
-│       ├── apa-visualization/
-│       └── project-tier-structure/
-│
+├── logs/                    # Project progress logs
+├── references/              # Reference materials
+├── scripts/                 # Utility scripts
 ├── requirements.txt          # Python dependencies
 ├── .gitignore               # Git ignore rules
 └── README.md                # This file
@@ -85,16 +74,27 @@ pip install -r requirements.txt
 
 ### Running Experiments
 
-**MNIST ConvLSTM Experiment**:
+**Best Model (Exp11)**:
 ```bash
 cd src/experiments/mnist_convlstm
-python 02_train_model.py
-python 03_evaluate_model.py
+python 02_train_model.py --epochs 70 --time_steps 40 --rt_loss_weight 2.0 --speed_penalty 0.1
+```
+
+**SAT Model Training**:
+```bash
+python train_sat_4param.py --pretrained_path path/to/exp11_model.pth
+```
+
+**Analysis**:
+```bash
+# By experiment name
+python -m src.utils.unified_analysis --exp exp11_t40
+
+# By results path
+python -m src.utils.unified_analysis path/to/results.csv
 ```
 
 Results will be saved in `outputs/experiments/mnist_convlstm/`.
-
-For detailed instructions, see the [Quick Start Guide](docs/usage/quick_start.md).
 
 ## Key Components
 
@@ -105,109 +105,122 @@ The EAM module implements cognitive models of decision-making:
 - Drift rate modeling
 - Decision threshold mechanisms
 - Reaction time prediction
+- Speed-accuracy trade-off
 
 **Location**: `src/models/eam/`
 
-**Documentation**: [Model Architecture](docs/models/architecture.md)
-
 ### 2. Neural Network Models
 
-#### ConvLSTM
+#### ConvLSTM (Primary Model)
 
 Convolutional LSTM for sequential image processing:
 
-- Spatial feature extraction
+- Spatial feature extraction (16 filters, kernel=3)
 - Temporal dynamics modeling
+- Evidence accumulation mechanism
+- Differentiable decision function
 - Reaction time supervision
 
-#### AlexNet-LSTM
+#### ConvLSTM-SAT
 
-AlexNet feature extractor combined with LSTM:
+Extended ConvLSTM with Speed-Accuracy Trade-off:
 
-- Pre-trained feature extraction
-- Sequential processing
-- Behavioral prediction
+- Condition-specific thresholds (speed vs accuracy)
+- Learnable threshold parameters
+- Transfer learning from base model
 
-### 3. Data Processing
+### 3. Unified Analysis Tool
 
-Data pipeline from raw to analysis-ready:
+Consolidated analysis pipeline for all experiments:
 
+```bash
+python -m src.utils.unified_analysis --exp <experiment_name>
 ```
-Raw Data → Processing Scripts → Processed Data → Model Training
-```
 
-**Scripts**: `src/data/`
-
-**Documentation**: [Data Sources](docs/data/data_sources.md)
+Generates:
+- RT distribution comparison
+- Correct vs Error RT analysis
+- Accuracy comparison by stimulus
+- Difficulty analysis
+- Speed-accuracy trade-off analysis
+- Statistical reports
 
 ### 4. Visualization
 
-APA-compliant visualization tools for publication-ready figures:
+APA-compliant visualization tools:
 
-- Bar charts, line graphs, scatter plots
 - Colorblind-friendly palettes
 - 300 DPI output quality
+- Publication-ready figures
 
-**Skill**: `.trae/skills/apa-visualization/`
+## Best Model Results (Exp11)
 
-## Experiments
+**Status**: ✅ Best performing model
 
-### MNIST ConvLSTM with Learnable Noise (100 Epochs)
+| Metric | Model | Human | Notes |
+|--------|-------|-------|-------|
+| Overall Accuracy | **80.9%** | 70.4% | Exceeds human |
+| RT Ratio | **1.27x** | - | Best result |
+| RT Correlation | **0.029** | - | Positive |
+| Final Threshold | 4.28 | - | Learned |
 
-**Status**: ✅ Completed (2026-03-13)
+### Difficulty Analysis
 
-**Objective**: Train ConvLSTM with learnable noise parameters to predict human responses and RTs
+| Difficulty | Model Accuracy | Human Accuracy | RT Ratio |
+|------------|----------------|----------------|----------|
+| Easy | 91.7% | 81.3% | 1.33x |
+| Difficult | 69.9% | 59.6% | 1.21x |
 
-**Key Results**:
-| Metric | Value |
-|--------|-------|
-| Accuracy (vs correct label) | 78.44% |
-| Accuracy (vs human response) | 63.66% |
-| RT Correlation | 0.1105 |
+### Speed-Accuracy Trade-off
 
-**Critical Issue**: RT distribution does NOT match human RT distribution
-- Model RT: ~2.9s (uniform distribution)
-- Human RT: ~0.91s (right-skewed)
-- Noise parameters collapsed to near-zero
+| Behavior | Human | Model |
+|----------|-------|-------|
+| Error RT | SLOWER (+0.095s) | Similar (-0.007s) |
+| Root Cause | Difficulty-specific thresholds | Global threshold |
 
-**Location**: `outputs/experiments/mnist_convlstm/learnable_noise_ep100/`
+**Finding**: Model captures RT matching but not human-like speed-accuracy trade-off.
 
-**Documentation**: [Experiment README](outputs/experiments/mnist_convlstm/learnable_noise_ep100/README.md)
+## Experiments Summary
 
-### MNIST ConvLSTM (Initial)
+| Experiment | Time Steps | Epochs | Accuracy | RT Ratio | RT Corr | Status |
+|------------|------------|--------|----------|----------|---------|--------|
+| Exp07 | 20 | 100 | 77.9% | 2.03x | 0.001 | Done |
+| Exp08 | 20 | 70 | 78.8% | 1.66x | -0.007 | Done |
+| Exp10 | 25 | 70 | 72.7% | 1.55x | -0.005 | Done |
+| **Exp11** | **40** | **70** | **80.9%** | **1.27x** | **0.029** | **Best** |
+| Exp12 | 40 | 40 | 69.2% | 1.33x | 0.024 | Done |
+| Exp_SAT | 40 | 70 | ~19% | - | 0.17-0.20 | Issues |
+| Exp_SAT_Improved | 40 | 10 | - | - | - | Running |
 
-**Status**: ✅ Completed
+## SAT Model Development
 
-**Objective**: Train ConvLSTM on MNIST for reaction time prediction
+### Current Status
 
-**Results**:
-- Model: `outputs/experiments/mnist_convlstm/models/convlstm_model.pth`
-- Figures: `outputs/experiments/mnist_convlstm/analysis/`
-- Results: `outputs/experiments/mnist_convlstm/results.csv`
+The SAT (Speed-Accuracy Trade-off) model is under development to capture human-like decision strategies:
 
-**Documentation**: [Experiment README](src/experiments/mnist_convlstm/README.md)
+1. **Basic SAT Model**: Implemented condition-specific thresholds
+2. **4-Parameter SAT**: Added fixed penalty coefficients
+3. **Improved Loss Design**: Condition-specific loss weights (in progress)
 
-### MNIST AlexNet-LSTM
+### Research Plans
 
-**Status**: 🔄 In Progress
-
-**Objective**: Compare AlexNet-LSTM performance with ConvLSTM
-
-**Location**: `src/experiments/mnist_alexnet_lstm/`
+Located in `drafts/ideas/`:
+- `SAT_4param_research_plan.md` - 4-parameter SAT research plan
+- `SAT_Improved_Loss_Plan.md` - Improved loss design plan
 
 ## Documentation
 
-### For Users
+### Experiment Logs
 
-- [Quick Start Guide](docs/usage/quick_start.md) - Get started quickly
-- [Data Sources](docs/data/data_sources.md) - Data documentation
-- [Model Architecture](docs/models/architecture.md) - Model details
+Located in `logs/`:
+- `2026-03-19_progress_log.md` - Latest progress
+- `2026-03-17_progress_log.md` - RT analysis and model improvement
+- `2026-03-14_progress_log.md` - Progress from 2026-03-14 to 2026-03-16
 
-### For Developers
+### Experiment-Specific Documentation
 
-- [Project Structure](#project-structure) - Directory organization
-- [Adding New Models](docs/models/architecture.md#implementation-guidelines) - Development guide
-- [Code Documentation](src/models/README.md) - Code structure
+- `src/experiments/mnist_convlstm/README.txt` - Experiment directory guide
+- `src/utils/README.md` - Unified analysis tool usage
 
 ## Reproducibility
 
@@ -216,14 +229,14 @@ This project follows the **TIER Protocol 4.0** for reproducible research:
 ✅ **Sufficiency**: All data and code included  
 ✅ **Soup-to-nuts**: Complete pipeline from raw data to results  
 ✅ **Portability**: Relative paths, no hardcoded locations  
-✅ **One-click reproducibility**: Scripts reproduce all results  
+✅ **One-click reproducibility**: Scripts reproduce all results
 
 ### Reproducing Results
 
 1. Ensure data is in `data/raw/`
 2. Run processing scripts in `src/data/`
 3. Run experiment scripts in `src/experiments/`
-4. Check outputs in `outputs/experiments/`
+4. Analyze results with `python -m src.utils.unified_analysis`
 
 ## Technologies
 
@@ -231,8 +244,7 @@ This project follows the **TIER Protocol 4.0** for reproducible research:
 - **PyTorch** - Deep learning framework
 - **NumPy** - Numerical computing
 - **Pandas** - Data manipulation
-- **Matplotlib** - Visualization
-- **Jupyter** - Interactive analysis
+- **Matplotlib/Seaborn** - Visualization
 
 ## Contributing
 
@@ -263,10 +275,11 @@ If you use this code, please cite:
 
 - TIER Protocol for reproducibility guidelines
 - APA Publication Manual for visualization standards
-- [Other acknowledgments]
+- Alós-Ferrer & Garagnani (2026) for SAT theoretical framework
+- Rafiei et al. (2024) for RTNet reference
 
 ---
 
-**Last Updated**: 2026-03-13
+**Last Updated**: 2026-03-20
 
-**Project Status**: 🔄 Active Development
+**Project Status**: 🔄 Active Development (SAT Model)
